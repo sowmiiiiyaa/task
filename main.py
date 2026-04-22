@@ -1,8 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional, List
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
+
+# ✅ NEW IMPORTS
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 
 class Task(BaseModel):
@@ -19,6 +23,7 @@ class TaskCreate(BaseModel):
 
 app = FastAPI(title="TaskFlow API")
 
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +32,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory store for demo purposes
+# ✅ STATIC + TEMPLATES (NEW)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+# ✅ HOME ROUTE (VERY IMPORTANT)
+@app.get("/")
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# In-memory store
 _tasks: List[dict] = []
 
 
