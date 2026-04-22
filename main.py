@@ -1,27 +1,13 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
-from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
+import os
 
-# ✅ NEW IMPORTS
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-
-
-class Task(BaseModel):
-    id: str
-    title: str
-    deadline: Optional[str] = None
-    completed: bool = False
-
-
-class TaskCreate(BaseModel):
-    title: str
-    deadline: Optional[str] = None
-
-
-app = FastAPI(title="TaskFlow API")
+app = FastAPI()
 
 # ✅ CORS
 app.add_middleware(
@@ -32,31 +18,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ STATIC + TEMPLATES (NEW)
+# ✅ Static files (CSS, JS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
-# ✅ HOME ROUTE (VERY IMPORTANT)
+# ✅ HOME ROUTE (FIXED — NO JINJA)
 @app.get("/")
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def home():
+    return FileResponse(os.path.join("templates", "index.html"))
 
+# -------------------------
+# ✅ TASK API
+# -------------------------
 
-# In-memory store
+class Task(BaseModel):
+    id: str
+    title: str
+    deadline: Optional[str] = None
+    completed: bool = False
+
+class TaskCreate(BaseModel):
+    title: str
+    deadline: Optional[str] = None
+
+# In-memory DB
 _tasks: List[dict] = []
-
 
 @app.get("/tasks", response_model=List[Task])
 def get_tasks():
     return _tasks
 
-
 @app.post("/tasks", response_model=Task, status_code=201)
 def create_task(payload: TaskCreate):
-    t = Task(id=str(uuid4()), title=payload.title, deadline=payload.deadline, completed=False)
+    if not payload.title:
+        raise HTTPException(status_code=400, detail="Title required")
+
+    t = Task(
+        id=str(uuid4()),
+        title=payload.title,
+        deadline=payload.deadline,
+        completed=False
+    )
     _tasks.append(t.dict())
     return t
-
 
 @app.put("/tasks/{task_id}", response_model=Task)
 def update_task(task_id: str, payload: Task):
@@ -65,7 +68,6 @@ def update_task(task_id: str, payload: Task):
             _tasks[i] = payload.dict()
             return _tasks[i]
     raise HTTPException(status_code=404, detail="Task not found")
-
 
 @app.delete("/tasks/{task_id}", status_code=204)
 def delete_task(task_id: str):
