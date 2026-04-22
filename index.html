@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TaskFlow — Manage Your Tasks Effortlessly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="horizon-glow"></div>
+      <canvas id="particles" aria-hidden="true"></canvas>
+      <div class="stars"></div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-inner">
+        <div class="brand">TaskFlow</div>
+        <div class="nav-actions">
+          <button class="btn ghost">Sign In</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+      <header class="hero">
+        <h1>Manage Your Tasks</h1>
+        <p class="sub">A clean, simple workspace to track your priorities.</p>
+        
+      </header>
+
+      <section class="task-section">
+        <div class="left-col">
+          <div class="task-card glass input-card">
+            <div class="card-title">Add a new task</div>
+            <div class="form-row">
+              <input id="taskTitle" type="text" placeholder="Task title" autocomplete="off" />
+              <input id="taskDeadline" type="date" />
+              <button id="addTaskBtn" class="btn add">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div id="empty-state" class="task-card glass" style="display:none; justify-content:center; text-align:center;">
+            No tasks added yet
+          </div>
+
+          <div id="task-list" class="tasks-grid">
+            <!-- tasks inserted here -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
