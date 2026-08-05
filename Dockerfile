@@ -2,9 +2,15 @@ FROM python:3.10
 
 WORKDIR /app
 
-COPY . .
+# Copy only requirements first (better stability)
+COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies (more stable)
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy rest of project
+COPY . .
 
 EXPOSE 8000
 
